@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12707E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Рабочее место руководителя СИБ</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap">
 <style>
@@ -52,6 +55,31 @@ td select[data-v="Блокировано"],td select[data-v="Открыт"]{back
 .heat{display:grid;grid-template-columns:auto repeat(5,48px);gap:3px;align-items:center;font-size:12.5px;color:var(--mut)}
 .heat b{display:flex;align-items:center;justify-content:center;height:40px;border-radius:5px;color:#fff;font-size:15px}
 .note{color:var(--mut);font-size:13px;margin:10px 0 0}
+@media (max-width:720px){
+header{position:static;padding:10px 14px}
+body::before{display:none}
+h1{font-size:17px}
+.save{margin-left:0;width:100%}
+main{padding:12px 12px 96px}
+nav{position:fixed;left:0;right:0;bottom:0;margin:0;gap:0;background:var(--card);border-top:1px solid var(--line);padding:4px 2px calc(4px + env(safe-area-inset-bottom,0px));z-index:7;overflow:visible}
+nav button{flex:1;padding:10px 0;font-size:11.5px;text-align:center;border-radius:8px;min-height:44px}
+.tools .btn{min-height:44px;flex:1}
+.tw{border:0;background:none;overflow:visible}
+table,thead,tbody,tr,td{display:block;min-width:0;width:100%}
+thead{display:none}
+tr{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px 6px;margin-bottom:10px}
+td{display:flex;align-items:center;gap:8px;border:0;padding:3px 0}
+td::before{content:attr(data-label);flex:0 0 38%;font-size:12.5px;color:var(--mut)}
+td:first-child{flex-direction:column;align-items:stretch;gap:2px;padding-right:46px}
+td:first-child::before{flex:none}
+td input,td select{flex:1;min-width:0;border-color:var(--line);background:var(--card);padding:9px 8px;font-size:16px;min-height:44px}
+td.xx{position:absolute;top:2px;right:2px;width:auto;padding:0}
+td.xx::before{display:none}
+.x{font-size:24px;padding:6px 14px;min-height:44px}
+.card{padding:14px}
+.big{font-size:38px}
+.heat{grid-template-columns:auto repeat(5,minmax(0,1fr))}
+}
 @media print{header nav,.tools,.x,.save{display:none}body{background:#fff}}
 </style>
 </head>
@@ -61,10 +89,11 @@ td select[data-v="Блокировано"],td select[data-v="Открыт"]{back
 <nav id="nav" role="tablist"></nav>
 </header>
 <main id="main"></main>
+<input type="file" id="imp" accept="application/json,.json" hidden>
 <script>
 (function(){
 var ST=["Не начато","В работе","Выполнено","Блокировано"],SEV=["Низкая","Средняя","Высокая","Критичная"],IST=["Открыт","В обработке","Закрыт"],BR=["Правовая основа","Организационные","Технические","Мониторинг","Контроль"];
-var TABS=[["ov","Обзор"],["m","Меры защиты"],["r","Риски"],["k","Показатели"],["e","Инциденты"]];
+var TABS=[["ov","Обзор"],["m","Меры"],["r","Риски"],["k","Показатели"],["e","Инциденты"]];
 var COLS={
 m:[["t","Мера","text"],["b","Направление","sel",BR],["base","Нормативная основа","text"],["own","Ответственный","text"],["due","Срок","date"],["st","Статус","sel",ST]],
 r:[["t","Риск","text"],["p","Вероятность (1–5)","sel",["1","2","3","4","5"]],["i","Ущерб (1–5)","sel",["1","2","3","4","5"]],["sc","Оценка","calc"],["mit","Что делаем","text"],["own","Ответственный","text"]],
@@ -107,16 +136,16 @@ function overview(){
  h+='<div class="card"><h3>Высокие риски</h3><div class="big" style="color:var(--'+(hi.length?"bd":"ok")+')">'+hi.length+'</div><ul class="l">'+hr.slice(0,5).map(function(r){var l=lvl(sc(r));return'<li><span>'+esc(r.t)+'</span><span class="tag t-'+l[1]+'">'+sc(r)+"</span></li>"}).join("")+'</ul></div>';
  h+='<div class="card"><h3>Показатели вне цели</h3><div class="big" style="color:var(--'+(ko.length?"bd":"ok")+')">'+ko.length+'</div><ul class="l">'+S.k.slice(0,6).map(function(k){var s=kst(k);return'<li><span>'+esc(k.t)+'</span><span class="tag t-'+s[1]+'">'+s[0]+"</span></li>"}).join("")+'</ul></div>';
  h+='<div class="card"><h3>Открытые инциденты</h3><div class="big">'+op.length+'</div><ul class="l">'+op.slice(0,5).map(function(e){return'<li><span>'+esc(e.t||"Без описания")+'</span><span class="sub">'+esc(e.sev)+'</span></li>'}).join("")+'</ul>'+(op.length?"":'<div class="sub">Открытых инцидентов нет</div>')+'</div>';
- return h+'</div><p class="note">Обзор считается по данным вкладок. Оценки рисков и показатели заполнены шаблонно: внесите реальные значения.</p>'}
+ return h+'</div><div class="tools" style="margin-top:12px"><button class="btn" data-exp="1">Сохранить копию</button><button class="btn" data-imp="1">Загрузить копию</button></div><p class="note">Копия нужна для переноса данных на другое устройство. Обзор считается по данным вкладок. Оценки рисков и показатели заполнены шаблонно: внесите реальные значения.</p>'}
 function table(k){
  var cols=COLS[k],h='<div class="tools"><button class="btn p" data-add="'+k+'">Добавить строку</button><button class="btn" data-print="1">Печать</button></div>';
  if(k==="r")h+='<div class="card" style="margin-bottom:12px"><h3>Матрица рисков</h3><div id="heat"></div></div>';
  h+='<div class="tw"><table><thead><tr>'+cols.map(function(c){return"<th>"+c[1]+"</th>"}).join("")+"<th></th></tr></thead><tbody>";
  S[k].forEach(function(row,i){h+="<tr>"+cols.map(function(c){
   var v=row[c[0]];
-  if(c[2]==="calc")return'<td data-calc="'+c[0]+'" data-i="'+i+'"></td>';
-  if(c[2]==="sel")return'<td><select data-k="'+k+'" data-i="'+i+'" data-f="'+c[0]+'" data-v="'+esc(v)+'">'+c[3].map(function(o){return"<option"+(o===v?" selected":"")+">"+o+"</option>"}).join("")+"</select></td>";
-  return'<td><input type="'+(c[2]==="number"?"number":c[2])+'"'+(c[2]==="number"?' step="any"':"")+' data-k="'+k+'" data-i="'+i+'" data-f="'+c[0]+'" value="'+esc(v)+'"></td>'}).join("")+'<td><button class="x" data-del="'+k+':'+i+'" aria-label="Удалить строку">×</button></td></tr>'});
+  if(c[2]==="calc")return'<td data-label="'+c[1]+'" data-calc="'+c[0]+'" data-i="'+i+'"></td>';
+  if(c[2]==="sel")return'<td data-label="'+c[1]+'"><select data-k="'+k+'" data-i="'+i+'" data-f="'+c[0]+'" data-v="'+esc(v)+'">'+c[3].map(function(o){return"<option"+(o===v?" selected":"")+">"+o+"</option>"}).join("")+"</select></td>";
+  return'<td data-label="'+c[1]+'"><input type="'+(c[2]==="number"?"number":c[2])+'"'+(c[2]==="number"?' step="any"':"")+' data-k="'+k+'" data-i="'+i+'" data-f="'+c[0]+'" value="'+esc(v)+'"></td>'}).join("")+'<td class="xx"><button class="x" data-del="'+k+':'+i+'" aria-label="Удалить строку">×</button></td></tr>'});
  h+="</tbody></table></div>";
  if(!S[k].length)h+='<p class="note">Пока пусто. Нажмите «Добавить строку».</p>';
  return h}
@@ -139,7 +168,10 @@ document.addEventListener("click",function(e){
  if(t.dataset.tab){tab=t.dataset.tab;render()}
  else if(t.dataset.add){var k=t.dataset.add;S[k].push(k==="m"?M("Новая мера","Организационные"):k==="r"?{t:"Новый риск",p:"3",i:"3",mit:"",own:""}:k==="k"?{t:"Новый показатель",cur:"",tar:"",dir:"меньше"}:{d:today(),t:"",sev:"Средняя",own:"",st:"Открыт"});save();render()}
  else if(t.dataset.del){var a=t.dataset.del.split(":");S[a[0]].splice(+a[1],1);save();render()}
- else if(t.dataset.print){window.print()}});
+ else if(t.dataset.print){window.print()}
+ else if(t.dataset.exp){var b=new Blob([JSON.stringify(S)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="sib-data-"+today()+".json";document.body.appendChild(a);a.click();a.remove()}
+ else if(t.dataset.imp){document.getElementById("imp").click()}});
+document.getElementById("imp").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);["m","r","k","e"].forEach(function(x){if(Array.isArray(o[x]))S[x]=o[x]});save();render();setSv("Копия загружена")}catch(er){setSv("Файл не подошёл")}e.target.value=""};r.readAsText(f)});
 main.addEventListener("change",function(e){var el=e.target;if(!el.dataset.k)return;
  S[el.dataset.k][+el.dataset.i][el.dataset.f]=el.value;if(el.tagName==="SELECT")el.dataset.v=el.value;calc();save()});
 render();load();
